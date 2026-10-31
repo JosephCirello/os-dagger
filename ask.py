@@ -1,4 +1,5 @@
 """Ask OS DAGGER a doctrine question and get an answer that cites pub and page.
+OS DAGGER is a free tool from Potestas AI (https://potestasai.com). MIT license.
 
     python ask.py "What are the principles of sustainment?"
     python ask.py --retrieve-only "movement control responsibilities"   # no model, no key

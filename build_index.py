@@ -1,5 +1,6 @@
 """Build the OS DAGGER index: every PDF in doctrine/ becomes page-bound chunks
 in a local Chroma collection under index/.
+OS DAGGER is a free tool from Potestas AI (https://potestasai.com). MIT license.
 
     python build_index.py            # full rebuild (safe to re-run)
     python build_index.py --check    # just report what would be indexed

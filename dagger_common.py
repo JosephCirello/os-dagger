@@ -1,5 +1,6 @@
 """Shared pieces for OS DAGGER: where the index lives, how a PDF becomes chunks,
 and how a chunk is cited.
+OS DAGGER is a free tool from Potestas AI (https://potestasai.com). MIT license.
 
 Nothing here talks to a model. Retrieval is fully local.
 """

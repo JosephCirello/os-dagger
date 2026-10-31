@@ -25,3 +25,7 @@ Source: https://armypubs.army.mil (Doctrine and Training, then the ADP, ATP, FM 
 ## Adding your own
 
 Drop any PDF into this folder named `SERIES_NUMBER_Title_Words_YYYY-MM-DD.pdf` (for example `ATP_4-43_Petroleum_Supply_Operations_2015-08-06.pdf`) and run `python build_index.py`. The series and number become the citation tag. Keep this table honest: add a row with the edition and the hash.
+
+---
+
+OS DAGGER is a free tool from [Potestas AI](https://potestasai.com).

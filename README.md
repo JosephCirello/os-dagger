@@ -131,3 +131,7 @@ Put a PDF in `doctrine/` named `SERIES_NUMBER_Title_YYYY-MM-DD.pdf` and rebuild.
 Code: MIT. The publications are U.S. Government works in the public domain; see `LICENSE` and `doctrine/SOURCES.md`.
 
 Built by Joseph Cirello, U.S. Army veteran, Providence, RI.
+
+---
+
+**A free tool from [Potestas AI](https://potestasai.com).** Potestas AI tests what AI agents do, not what they say, and publishes the evidence. OS DAGGER is given away in that spirit: every answer it writes shows its sources, and it says so when the sources run out.

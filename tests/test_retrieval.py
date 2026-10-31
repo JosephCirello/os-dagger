@@ -1,4 +1,5 @@
-"""Checks a visitor can run after `python build_index.py`:
+"""Checks a visitor can run after `python build_index.py`.
+OS DAGGER is a free tool from Potestas AI (https://potestasai.com). MIT license.
 
     python -m pytest tests -q        (or)        python tests/test_retrieval.py
 
