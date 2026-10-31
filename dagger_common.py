@@ -30,7 +30,43 @@ class Chunk:
     pub: str        # e.g. "ATP 3-35"
     title: str      # e.g. "Army Deployment and Redeployment"
     file: str       # file name inside doctrine/
-    page: int       # 1-based PDF page number (not the printed page label)
+    page: int       # 1-based PDF page number
+    printed: str    # the page number printed on the page ("3-7", "vii", "12"), or "" if not found
+
+
+_MONTHS = "January|February|March|April|May|June|July|August|September|October|November|December"
+
+
+def printed_page(text: str, pub: str) -> str:
+    """Read the printed page number out of the running header or footer.
+
+    Army publications print it on the same line as the pub number and date:
+    '1-6 ATP 4-16 25 April 2022' or 'ADP 3-0 21 March 2025 27' or 'vii'.
+    Only the first and last 300 characters of the page are searched, so a
+    cross-reference in the body ("see paragraph 3-7") is never mistaken for it.
+    """
+    # "AR 600-20" is printed "AR 600–20" (en dash); a changed pub adds "(INCL C1)";
+    # regulations put a bullet between pub and date.
+    pub_re = re.escape(pub).replace(r"\ ", r"\s*").replace(r"\-", r"[-–‑]")
+    pub_full = rf"{pub_re}(?:\s*\(INCL\s*C\d+\))?"
+    sep = r"(?:\s*[•·]\s*|\s+)"
+    date_re = rf"\d{{1,2}}\s+(?:{_MONTHS})\s+\d{{4}}"
+    num = r"([A-Z]-\d{1,3}|\d{1,2}-\d{1,3}|\d{1,3}|[ivxlc]{1,6})"  # "B-2", "3-7", "27", "vii"
+    head, tail = text[:300], text[-300:]
+    for zone in (tail, head):
+        z = re.sub(r"\s+", " ", zone)
+        # number, then pub and date in either order
+        m = (re.search(rf"\b{num}{sep}{pub_full}{sep}{date_re}", z)
+             or re.search(rf"{pub_full}{sep}{date_re}{sep}{num}\b", z)
+             or re.search(rf"{date_re}{sep}{pub_full}{sep}{num}\b", z)
+             or re.search(rf"\b{num}{sep}{date_re}{sep}{pub_full}", z))
+        if m:
+            return m.group(1)
+    # Some PDFs garble the header date into font codes ("0D\" for "May"). Fall back
+    # to the number sitting right beside the pub number, header zone only.
+    z = re.sub(r"\s+", " ", text[:150])
+    m = re.search(rf"\b{num}\s+{pub_full}\b", z) or re.search(rf"\b{pub_full}\s+(?:\S{{1,12}}\s+)?{num}\b", z)
+    return m.group(1) if m else ""
 
 
 def pub_from_filename(name: str) -> tuple[str, str]:
@@ -93,17 +129,29 @@ def read_pdf_chunks(pdf_path: Path) -> list[Chunk]:
             text = page.extract_text() or ""
         except Exception:  # a damaged page should not sink the whole pub
             text = ""
+        label = printed_page(text, pub)
         for i, piece in enumerate(split_page(text)):
             out.append(Chunk(
                 chunk_id=f"{pdf_path.stem}::p{page_no}::c{i}",
-                text=piece, pub=pub, title=title, file=pdf_path.name, page=page_no,
+                text=piece, pub=pub, title=title, file=pdf_path.name, page=page_no, printed=label,
             ))
     return out
 
 
 def cite(meta: dict) -> str:
-    """How a source is named to the reader and to the model: 'ATP 3-35, p. 42'."""
-    return f"{meta['pub']}, p. {meta['page']}"
+    """How a source is named to the reader and to the model.
+
+    Prefers the number printed on the page, which is how doctrine is quoted:
+    'ATP 3-35, p. 3-7'. Falls back to the PDF page: 'ATP 3-35, PDF p. 42'.
+    """
+    if meta.get("printed"):
+        return f"{meta['pub']}, p. {meta['printed']}"
+    return f"{meta['pub']}, PDF p. {meta['page']}"
+
+
+def locate(meta: dict) -> str:
+    """Where to open the file: 'PDF page 42' (what a PDF reader's page box takes)."""
+    return f"PDF page {meta['page']}"
 
 
 def open_collection(create: bool = False):

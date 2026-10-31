@@ -28,7 +28,8 @@ def collect() -> list[Chunk]:
         t0 = time.time()
         these = read_pdf_chunks(pdf)
         pages = {c.page for c in these}
-        print(f"  {these[0].pub if these else pdf.stem:12} {len(these):5} chunks from {len(pages):4} pages  ({time.time()-t0:4.1f}s)  {pdf.name}")
+        labeled = {c.page for c in these if c.printed}
+        print(f"  {these[0].pub if these else pdf.stem:12} {len(these):5} chunks from {len(pages):4} pages, printed page number read on {len(labeled):4}  ({time.time()-t0:4.1f}s)  {pdf.name}")
         chunks.extend(these)
     return chunks
 
@@ -52,7 +53,7 @@ def main() -> None:
         col.add(
             ids=[c.chunk_id for c in batch],
             documents=[c.text for c in batch],
-            metadatas=[{"pub": c.pub, "title": c.title, "file": c.file, "page": c.page} for c in batch],
+            metadatas=[{"pub": c.pub, "title": c.title, "file": c.file, "page": c.page, "printed": c.printed} for c in batch],
         )
         done = min(i + BATCH, len(chunks))
         print(f"  embedded {done}/{len(chunks)}  ({time.time()-t0:5.0f}s)", end="\r")

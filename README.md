@@ -2,7 +2,17 @@
 
 Ask U.S. Army doctrine a question and get an answer that cites the publication and the page.
 
-Ten current publications on operations, planning, deployment, movement, sustainment and command, indexed locally. Retrieval runs on your machine with no key. The answer is written by whatever model you point it at: xAI, OpenAI, Anthropic, or a local model through Ollama with nothing leaving the laptop.
+## What it does, in plain terms
+
+You type a question the way you would ask a senior NCO: "What are the tenets of operations?" or "Who approves a unit movement plan?" The tool searches ten Army manuals and regulations on your own computer, pulls the handful of pages that actually talk about it, and hands only those pages to an AI model. The model writes a short answer, and after every sentence it puts the pub and page number it came from, like `[ATP 3-35, p. 3-7]`, so you can open the book and check. If the pages do not answer the question, it says so instead of making something up.
+
+Nothing is sent anywhere until the answer is written, and even then only the few pages found go to the model. Use a local model and nothing leaves the laptop at all.
+
+Who it is for: staff officers and NCOs who need the doctrinal answer with the citation, fast, and anyone who wants to see how a cited question-answering tool is built in about three hundred lines of Python.
+
+## What is in the box
+
+Ten current publications on operations, planning, deployment, movement, sustainment and command. Searching is local and needs no account. The answer is written by whatever model you point it at: xAI, OpenAI, Anthropic, or a local model through Ollama.
 
 Real output, retrieval only, no model, on the shipped index:
 
@@ -22,36 +32,41 @@ operational objectives. During the execution of large-scale combat operations, m
 With a model configured (here, Grok 4.7 through xAI), `python ask.py "What are the tenets of operations?"` gave this, verbatim, on 2026-10-30:
 
 ```
-The excerpts list two different sets of tenets.
+The excerpts list two different sets.
 
-**Tenets of unified land operations** (ADP 5-0, 31 July 2019). Desirable attributes built into
-all plans and operations, directly related to the Army's operational concept. Commanders and
-staffs incorporate: simultaneity, depth, synchronization, and flexibility [ADP 5-0, p. 49].
+Per [FM 4-0, p. 6], the tenets of operations are agility, convergence, endurance, and depth. They
+are desirable attributes built into all plans and operations, related to how operations should be
+conducted, and used to inform and assess courses of action throughout the operations process.
 
-**Tenets of operations / multidomain operations** (ADP 3-0, 21 March 2025; FM 4-0, 20 March 2026).
-Desirable attributes built into all plans and operations; commanders use them to inform and assess
-courses of action. They are: agility, convergence, endurance, and depth [FM 4-0, p. 22] [ADP 3-0, p. 39].
+Per [ADP 3-0, p. 27], the tenets of multidomain operations are the same four: agility, convergence,
+endurance, and depth. They are desirable attributes incorporated into all Army plans and operations
+and used the same way.
+
+Per [ADP 5-0, p. 2-21], tenets of operations, also called tenets of unified land operations, are
+simultaneity, depth, synchronization, and flexibility. They are desirable attributes built into all
+plans and operations, directly related to the Army's operational concept, and describe the Army's
+approach to generating and applying combat power.
+
+Partial descriptions only:
 - Agility: ability to move forces and adjust dispositions and activities more rapidly than the
-  enemy; critical to protection and enables speed in large-scale combat [FM 4-0, p. 22] [ADP 3-0, p. 39].
-- Convergence: creates opportunities against adaptive, resilient enemies by complementary and
-  reinforcing Army and joint effects while preserving combat power [ADP 3-0, p. 39].
+  enemy [FM 4-0, p. 6]; critical to protection and enables speed in large-scale combat [ADP 3-0, p. 27].
+- Convergence: creates opportunities against evenly matched, adaptive, resilient enemies through
+  complementary and reinforcing Army and joint effects while preserving combat power [ADP 3-0, p. 27].
 - Endurance: absorb enemy attacks and sustain operations over the time and space required to
-  accomplish the mission [ADP 3-0, p. 39].
+  accomplish the mission [ADP 3-0, p. 27].
 
-...
-
-The excerpts do not define depth, synchronization, or flexibility, and do not complete the
-definition of simultaneity.
+The excerpts do not define depth, synchronization, or flexibility, complete the simultaneity
+definition, or reconcile the two lists.
 
 Sources:
-  FM 5-0, p. 33   Planning and Orders Production  (similarity 0.574)
-  ADP 5-0, p. 49  The Operations Process          (keyword match)
-  FM 4-0, p. 22   Sustainment Operations          (keyword match)
-  ADP 3-0, p. 39  Operations                      (keyword match)
+  FM 5-0, p. 19     Planning and Orders Production  (PDF page 33, similarity 0.574)
+  ADP 5-0, p. 2-21  The Operations Process          (PDF page 49, keyword match)
+  FM 4-0, p. 6      Sustainment Operations          (PDF page 22, keyword match)
+  ADP 3-0, p. 27    Operations                      (PDF page 39, keyword match)
   ...
 ```
 
-Two things in that answer are the point of the tool. It found that the 2019 ADP 5-0 still carries the older tenets while the 2025 ADP 3-0 carries the current four, and said so instead of blending them. And it closed with what the retrieved pages do not say, rather than filling the gap from memory.
+Two things in that answer are the point of the tool. It found that the 2019 ADP 5-0 still carries the older tenets while the 2025 ADP 3-0 and the 2026 FM 4-0 carry the current four, and said so instead of blending them. And it closed with what the retrieved pages do not say, rather than filling the gap from memory. Open ADP 3-0 to printed page 27 (PDF page 39) and the four tenets are there under paragraph 3-13.
 
 ## What is in it
 
@@ -81,9 +96,10 @@ python -m venv .venv && .venv\Scripts\activate      # on macOS/Linux: source .ve
 pip install -r requirements.txt
 python build_index.py                                # two to three minutes on a laptop; first run downloads an 80 MB embedding model
 python ask.py --retrieve-only "principles of sustainment"
+python tests/test_retrieval.py                       # five checks: parsing, page numbers, and known answers found on known pages
 ```
 
-That last command needs no key and shows you the pages the tool would hand to a model. To get written answers, copy `.env.example` to `.env`, fill in one endpoint, and drop the flag:
+The retrieve-only command needs no key and shows you the pages the tool would hand to a model. To get written answers, copy `.env.example` to `.env`, fill in one endpoint, and drop the flag:
 
 ```bash
 python ask.py "What are the responsibilities of a movement control team?"
@@ -95,7 +111,7 @@ python ask.py                                        # interactive
 
 1. `build_index.py` reads each PDF page by page with pypdf, cuts the text into chunks of about 1,500 characters that never cross a page, and stores them in a local [Chroma](https://www.trychroma.com/) collection under `index/`. Embeddings are Chroma's default small model, run locally.
 2. `ask.py` runs two searches and fuses them: the question embedded the same way against the vectors, and a BM25 keyword ranking over every chunk (doctrine lives on exact words: "tenets", "OPORD", "TPFDD", which a small embedding model blurs). The best eight by combined rank (change with `-k`) go to the model with one instruction: answer from these excerpts, cite each one as `[Pub, p. N]`, and say so if the excerpts do not answer the question.
-3. The page number in a citation is the PDF page, so you can open the file and go straight to it.
+3. The page number in a citation is the one printed on the page ("3-7"), read from each page's running header, which is how doctrine is quoted. The Sources list also gives the PDF page, which is what your PDF reader's page box takes. Where a page has no printed number (covers, figures), the citation says `PDF p. N` instead.
 
 The model never sees the whole publication, only what retrieval found, which keeps it honest and keeps the cost per question small.
 

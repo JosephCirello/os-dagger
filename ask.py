@@ -21,12 +21,12 @@ import argparse
 import re
 import sys
 
-from dagger_common import cite, env_or, open_collection
+from dagger_common import cite, env_or, locate, open_collection
 
 SYSTEM_PROMPT = """You answer questions about U.S. Army doctrine for a commander or staff officer.
 Rules:
 1. Use only the doctrine excerpts provided. No outside knowledge, no guessing.
-2. Cite every claim with the source tag exactly as given, for example [ATP 3-35, p. 42].
+2. Cite every claim with the source tag exactly as given, for example [ATP 3-35, p. 3-7].
 3. If the excerpts answer only part of the question, give that part first, with citations, then say in one line what they do not cover.
 4. If the excerpts do not answer it at all, say so plainly and name the closest thing they do say.
 5. Be precise and brief. Military register. No preamble, no filler."""
@@ -159,7 +159,7 @@ def answer(question: str, k: int, pub: str | None, retrieve_only: bool, show: bo
         return
     if show or retrieve_only:
         for i, h in enumerate(hits, 1):
-            print(f"\n[{i}] {cite(h['meta'])}  {match_label(h)}  ({h['meta']['title']})")
+            print(f"\n[{i}] {cite(h['meta'])}  {h['meta']['title']}  ({locate(h['meta'])}, {match_label(h)})")
             print(h["text"][:600].replace("\n", " ") + ("..." if len(h["text"]) > 600 else ""))
         print()
     if retrieve_only:
@@ -167,7 +167,7 @@ def answer(question: str, k: int, pub: str | None, retrieve_only: bool, show: bo
     print(generate(question, build_context(hits)))
     print("\nSources:")
     for h in hits:
-        print(f"  {cite(h['meta'])}  {h['meta']['title']}  ({match_label(h)})")
+        print(f"  {cite(h['meta']):22} {h['meta']['title']}  ({locate(h['meta'])}, {match_label(h)})")
 
 
 def match_label(hit: dict) -> str:
