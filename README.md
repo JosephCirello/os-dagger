@@ -2,7 +2,7 @@
 
 Ask U.S. Army doctrine a question and get an answer that cites the publication and the page.
 
-Eight current publications on deployment, movement, sustainment and command, indexed locally. Retrieval runs on your machine with no key. The answer is written by whatever model you point it at: xAI, OpenAI, Anthropic, or a local model through Ollama with nothing leaving the laptop.
+Ten current publications on operations, planning, deployment, movement, sustainment and command, indexed locally. Retrieval runs on your machine with no key. The answer is written by whatever model you point it at: xAI, OpenAI, Anthropic, or a local model through Ollama with nothing leaving the laptop.
 
 Real output, retrieval only, no model, on the shipped index:
 
@@ -19,12 +19,45 @@ operational objectives. During the execution of large-scale combat operations, m
 ... Within the competition continuum, movement control activities must be prepared to operate across the range of military operations. Movement control provides the ...
 ```
 
-With a model configured, the same command without `--retrieve-only` returns a short written answer in which every sentence carries a tag like `[ATP 4-16, p. 16]`, followed by the same Sources list.
+With a model configured (here, Grok 4.7 through xAI), `python ask.py "What are the tenets of operations?"` gave this, verbatim, on 2026-10-30:
+
+```
+The excerpts list two different sets of tenets.
+
+**Tenets of unified land operations** (ADP 5-0, 31 July 2019). Desirable attributes built into
+all plans and operations, directly related to the Army's operational concept. Commanders and
+staffs incorporate: simultaneity, depth, synchronization, and flexibility [ADP 5-0, p. 49].
+
+**Tenets of operations / multidomain operations** (ADP 3-0, 21 March 2025; FM 4-0, 20 March 2026).
+Desirable attributes built into all plans and operations; commanders use them to inform and assess
+courses of action. They are: agility, convergence, endurance, and depth [FM 4-0, p. 22] [ADP 3-0, p. 39].
+- Agility: ability to move forces and adjust dispositions and activities more rapidly than the
+  enemy; critical to protection and enables speed in large-scale combat [FM 4-0, p. 22] [ADP 3-0, p. 39].
+- Convergence: creates opportunities against adaptive, resilient enemies by complementary and
+  reinforcing Army and joint effects while preserving combat power [ADP 3-0, p. 39].
+- Endurance: absorb enemy attacks and sustain operations over the time and space required to
+  accomplish the mission [ADP 3-0, p. 39].
+
+...
+
+The excerpts do not define depth, synchronization, or flexibility, and do not complete the
+definition of simultaneity.
+
+Sources:
+  FM 5-0, p. 33   Planning and Orders Production  (similarity 0.574)
+  ADP 5-0, p. 49  The Operations Process          (keyword match)
+  FM 4-0, p. 22   Sustainment Operations          (keyword match)
+  ADP 3-0, p. 39  Operations                      (keyword match)
+  ...
+```
+
+Two things in that answer are the point of the tool. It found that the 2019 ADP 5-0 still carries the older tenets while the 2025 ADP 3-0 carries the current four, and said so instead of blending them. And it closed with what the retrieved pages do not say, rather than filling the gap from memory.
 
 ## What is in it
 
 | Pub | Title | Edition |
 |---|---|---|
+| ADP 3-0 | Operations | Mar 2025 |
 | ADP 4-0 | Sustainment | 2019, Change 1 Aug 2026 |
 | ADP 5-0 | The Operations Process | 2019 |
 | AR 525-93 | Army Deployment and Redeployment | Apr 2026 |
@@ -32,9 +65,10 @@ With a model configured, the same command without `--retrieve-only` returns a sh
 | ATP 3-35 | Army Deployment and Redeployment | Mar 2023 |
 | ATP 4-16 | Movement Control | Apr 2022 |
 | FM 4-0 | Sustainment Operations | Mar 2026 |
+| FM 5-0 | Planning and Orders Production | Nov 2024, Change 1 Aug 2025 |
 | FM 6-0 | Commander and Staff Organization and Operations | May 2022 |
 
-All eight are the editions the Army Publishing Directorate listed as active on 2026-10-30. Hashes and the reasons two other pubs are left out are in [doctrine/SOURCES.md](doctrine/SOURCES.md).
+All ten are the editions the Army Publishing Directorate listed as active on 2026-10-30. Hashes and the reasons two other pubs are left out are in [doctrine/SOURCES.md](doctrine/SOURCES.md).
 
 ## Run it
 
@@ -45,7 +79,7 @@ git clone https://github.com/JosephCirello/os-dagger.git
 cd os-dagger
 python -m venv .venv && .venv\Scripts\activate      # on macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-python build_index.py                                # about two minutes on a laptop; first run downloads an 80 MB embedding model
+python build_index.py                                # two to three minutes on a laptop; first run downloads an 80 MB embedding model
 python ask.py --retrieve-only "principles of sustainment"
 ```
 
@@ -60,7 +94,7 @@ python ask.py                                        # interactive
 ## How it works
 
 1. `build_index.py` reads each PDF page by page with pypdf, cuts the text into chunks of about 1,500 characters that never cross a page, and stores them in a local [Chroma](https://www.trychroma.com/) collection under `index/`. Embeddings are Chroma's default small model, run locally.
-2. `ask.py` embeds your question the same way, pulls the six closest chunks (change with `-k`), and sends only those chunks to the model with one instruction: answer from these excerpts, cite each one as `[Pub, p. N]`, and say so if the excerpts do not answer the question.
+2. `ask.py` runs two searches and fuses them: the question embedded the same way against the vectors, and a BM25 keyword ranking over every chunk (doctrine lives on exact words: "tenets", "OPORD", "TPFDD", which a small embedding model blurs). The best eight by combined rank (change with `-k`) go to the model with one instruction: answer from these excerpts, cite each one as `[Pub, p. N]`, and say so if the excerpts do not answer the question.
 3. The page number in a citation is the PDF page, so you can open the file and go straight to it.
 
 The model never sees the whole publication, only what retrieval found, which keeps it honest and keeps the cost per question small.
@@ -71,8 +105,8 @@ Put a PDF in `doctrine/` named `SERIES_NUMBER_Title_YYYY-MM-DD.pdf` and rebuild.
 
 ## Limits
 
-- Scanned PDFs with no text layer index as nothing. All eight shipped here have text.
-- Retrieval is by meaning, not by paragraph number. "AR 600-20 para 4-14" works less well than "what does the Army say about sexual harassment reporting".
+- Scanned PDFs with no text layer index as nothing. All ten shipped here have text.
+- Retrieval is by meaning and by keyword, not by paragraph number. "AR 600-20 para 4-14" works less well than "what does the Army say about sexual harassment reporting".
 - The answer is only as good as the retrieved pages. When the model says the excerpts do not cover it, raise `-k` or narrow with `--pub`.
 - The doctrine is a snapshot. Check the Army Publishing Directorate for changes after the date in `SOURCES.md`.
 
