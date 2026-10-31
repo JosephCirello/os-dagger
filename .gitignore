@@ -1,0 +1,14 @@
+# secrets
+.env
+
+# built index (rebuild with: python build_index.py)
+index/
+
+# environment and caches
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+Thumbs.db
