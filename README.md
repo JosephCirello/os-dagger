@@ -115,9 +115,17 @@ python ask.py                                        # interactive
 
 The model never sees the whole publication, only what retrieval found, which keeps it honest and keeps the cost per question small.
 
+## Where the line is (OPSEC)
+
+Everything in this repository is already public. The ten publications were downloaded from the Army Publishing Directorate's public site, which anyone can reach without a CAC, and each carries the Army's own distribution statement on its title page. This tool gives nobody anything they could not get from those PDFs and a search box; what it adds is the citation.
+
+What is deliberately not here: JP 3-35 was left out because the joint library behind JEL+ requires a CAC, and it was not going to be shipped from a mirror. No unit SOP, no FOUO or CUI, no plan, no order and no exercise material is in the index, and none should ever be committed to a public copy of it.
+
+If you add your own material (next section), do it on your own machine and keep it there. Point `ask.py` at a local model and nothing leaves the laptop. Doctrine is public; your unit's application of it is not.
+
 ## Add your own publications
 
-Put a PDF in `doctrine/` named `SERIES_NUMBER_Title_YYYY-MM-DD.pdf` and rebuild. The series and number become the citation tag. Works for any text PDF: unit SOPs, regulations, FMs you keep on hand.
+Put a PDF in `doctrine/` named `SERIES_NUMBER_Title_YYYY-MM-DD.pdf` and rebuild. The series and number become the citation tag. Works for any text PDF: unit SOPs, regulations, FMs you keep on hand, on your own machine only (see the section above).
 
 ## Limits
 
