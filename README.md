@@ -90,7 +90,7 @@ All ten are the editions the Army Publishing Directorate listed as active on 202
 Python 3.10 or newer.
 
 ```bash
-git clone https://github.com/JosephCirello/os-dagger.git
+git clone https://github.com/Potestas-AI/os-dagger.git
 cd os-dagger
 python -m venv .venv && .venv\Scripts\activate      # on macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
