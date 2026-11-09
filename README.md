@@ -136,7 +136,7 @@ Put a PDF in `doctrine/` named `SERIES_NUMBER_Title_YYYY-MM-DD.pdf` and rebuild.
 
 ## License
 
-Code: MIT. The publications are U.S. Government works in the public domain; see `LICENSE` and `doctrine/SOURCES.md`.
+Code: MIT (see `LICENSE`). The publications in `doctrine/` are U.S. Government works in the public domain and are not covered by the MIT license; see `NOTICE` and `doctrine/SOURCES.md`.
 
 Built by Joseph Cirello, U.S. Army veteran, Providence, RI.
 
