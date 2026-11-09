@@ -143,3 +143,13 @@ Built by Joseph Cirello, U.S. Army veteran, Providence, RI.
 ---
 
 **A free tool from [Potestas AI](https://potestasai.com).** Potestas AI tests what AI agents do, not what they say, and publishes the evidence. OS DAGGER is given away in that spirit: every answer it writes shows its sources, and it says so when the sources run out.
+
+---
+
+### Potestas AI
+
+**[Potestas AI](https://potestasai.com)** tests what AI agents do, not what they say, and publishes the evidence.
+
+- **Putting an AI agent in front of money, patients or customers?** [See the screening](https://potestasai.com/screening) or [book a 30-minute call](https://calendly.com/joseph-cirello-potestasai).
+- **Free book:** [Your AI Is Safe. Says Who?](https://potestasai.com/book)
+- **What we find, as we find it:** [potestasai.com/findings](https://potestasai.com/findings)
